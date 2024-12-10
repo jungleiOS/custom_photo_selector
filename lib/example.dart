@@ -1,6 +1,6 @@
 import 'package:custom_photo_selector/photo_picker_provider.dart';
-import 'package:custom_photo_selector/ui_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
@@ -27,11 +27,12 @@ class _ExampleState extends State<Example> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const UINavigationBar(title: 'Example'),
+      appBar: AppBar(title: const Text('example'),),
       body: MediaQuery.removePadding(
         context: context,
         removeTop: true,
         child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 3),
           itemCount: _dataList.length,
           itemBuilder: (context, index) {
             final model = _dataList[index];
@@ -48,6 +49,10 @@ class _ExampleState extends State<Example> {
 
   void initData() async {
     final tempList = await PhotoManager.getAssetPathList(type: RequestType.common);
+    if (tempList.isEmpty) {
+      EasyLoading.showToast('相册为空');
+      return;
+    }
     _currentPath = tempList.first;
     _pageIndex = 0;
     _assetList.clear();
@@ -81,14 +86,14 @@ class AssetGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = (constraints.maxWidth - 3) / 4;
+        final width = (constraints.maxWidth - 3*2) / 4;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(model.month),
             Wrap(
-              spacing: 1,
-              runSpacing: 1,
+              spacing: 2,
+              runSpacing: 2,
               children: model.assetList
                   .map(
                     (asset) => AssetEntityImage(

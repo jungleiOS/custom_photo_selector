@@ -281,6 +281,8 @@ class _PhotoPickerState extends State<PhotoPicker>
                               List<MonthlyAssetViewModel> monthlyAssets,
                               child) {
                             return ListView.builder(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3.0),
                               controller: _scrollController,
                               itemCount: monthlyAssets.length,
                               itemBuilder: (context, index) {
@@ -400,7 +402,6 @@ class MonthlyAssetGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
       child: Column(
@@ -409,7 +410,6 @@ class MonthlyAssetGroup extends StatelessWidget {
         children: [
           Row(
             children: [
-              const SizedBox(width: 8),
               Text(month),
               const Spacer(),
               Selector<PhotoPickerProvider, List<AssetEntity>>(
@@ -450,30 +450,21 @@ class MonthlyAssetGroup extends StatelessWidget {
               ),
             ],
           ),
-          Builder(
-            builder: (context) {
-              final totalRows = (assetList.length + gridCount - 1) ~/ gridCount;
-              const singleSpace = 2;
-              final totalSpace = (gridCount - 1) * singleSpace;
-              final itemWidth = (size.width - totalSpace) / gridCount;
-              final height =
-                  itemWidth * totalRows + (totalRows - 1) * singleSpace;
-              // debugPrint('--------> $month');
-              return SizedBox(
-                height: height,
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: assetList.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: gridCount,
-                    mainAxisSpacing: 2,
-                    crossAxisSpacing: 2,
-                  ),
-                  itemBuilder: (context, gridIndex) {
-                    // debugPrint('---------> ${assetList[gridIndex].createDateTime.toString()}');
-                    return _renderGridItem(gridIndex);
-                  },
-                ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final width =
+                  (constraints.maxWidth - 2 * (gridCount - 1)) / gridCount;
+              return Wrap(
+                runSpacing: 2.0,
+                spacing: 2.0,
+                children: assetList.map((e) {
+                  final gridIndex = assetList.indexOf(e);
+                  return SizedBox(
+                    width: width,
+                    height: width,
+                    child: _renderGridItem(gridIndex),
+                  );
+                }).toList(),
               );
             },
           ),
