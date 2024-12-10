@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,9 +7,9 @@ import 'package:photo_manager/photo_manager.dart';
 
 /// 判断资源可否被选择。
 typedef AssetSelectPredicate<Asset> = FutureOr<bool> Function(
-    Asset asset,
-    bool isSelected,
-    );
+  Asset asset,
+  bool isSelected,
+);
 
 /// 资源过滤器，用于过滤掉不符合要求的资源。返回false，则该资源将会被过滤掉。
 typedef AssetFilter = FutureOr<bool> Function(AssetEntity asset);
@@ -24,7 +23,7 @@ class PhotoPickerProvider extends ChangeNotifier {
     List<AssetEntity>? selectedAssets,
     this.requestType = RequestType.common,
   }) : _selectedAssets =
-      selectedAssets?.toList() ?? List<AssetEntity>.empty(growable: true);
+            selectedAssets?.toList() ?? List<AssetEntity>.empty(growable: true);
 
   final AssetSelectPredicate<AssetEntity>? selectPredicate;
   final AssetFilter? filter;
@@ -111,7 +110,7 @@ class PhotoPickerProvider extends ChangeNotifier {
   /// 取消选中资源
   void unSelectAsset(AssetEntity item) async {
     final bool? selectPredicateResult =
-    await selectPredicate?.call(item, false);
+        await selectPredicate?.call(item, false);
     if (selectPredicateResult == false) {
       return;
     }
@@ -145,9 +144,7 @@ class PhotoPickerProvider extends ChangeNotifier {
       EasyLoading.showToast('权限检查未通过，请开启相册访问权限');
       return;
     }
-    final tempList = await PhotoManager.getAssetPathList(
-      type: requestType,
-    );
+    final tempList = await PhotoManager.getAssetPathList(type: requestType);
     if (tempList.isNotEmpty) {
       final List<AssetPathEntity> list = [];
       for (var element in tempList) {
@@ -204,7 +201,7 @@ class PhotoPickerProvider extends ChangeNotifier {
 
   void _getAssetsFromPath(int pageIndex) async {
     final List<AssetEntity> list =
-    await currentPath!.getAssetListPaged(page: pageIndex, size: pageSize);
+        await currentPath!.getAssetListPaged(page: pageIndex, size: pageSize);
     _hasMoreToLoad = list.isNotEmpty;
     if (_enableFilter && filter != null) {
       for (var element in list) {
@@ -219,19 +216,17 @@ class PhotoPickerProvider extends ChangeNotifier {
     // _currentAssets 按时间排序
     _currentAssets.sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
     final viewModelList =
-    AssetGroupingHelper.groupByYearMonthDay(_currentAssets);
+        AssetGroupingHelper.groupByYearMonthDay(_currentAssets);
     setMonthlyAssets(viewModelList);
   }
 
   void loadMore() async {
     if (hasMoreToLoad) {
       _currentPage++;
-      debugPrint('-----------> $currentPage');
       _getAssetsFromPath(currentPage);
     }
   }
 }
-
 
 class MonthlyAssetViewModel {
   String month;
@@ -258,20 +253,20 @@ class AssetGroupingHelper {
       List<AssetEntity> assetEntities) {
     final Map<String, List<AssetEntity>> groupedAssets = assetEntities.fold(
       <String, List<AssetEntity>>{},
-          (Map<String, List<AssetEntity>> map, AssetEntity entity) {
+      (Map<String, List<AssetEntity>> map, AssetEntity entity) {
         final yearMonthCreate = _getYearMonthDay(entity.createDateSecond != null
             ? DateTime.fromMillisecondsSinceEpoch(
-            entity.createDateSecond! * 1000)
+                entity.createDateSecond! * 1000)
             : null);
         final yearMonthModified = _getYearMonthDay(
             entity.modifiedDateSecond != null
                 ? DateTime.fromMillisecondsSinceEpoch(
-                entity.modifiedDateSecond! * 1000)
+                    entity.modifiedDateSecond! * 1000)
                 : null);
 
         // 使用创建日期优先，如果创建日期为空，则使用修改日期
         final yearMonth =
-        yearMonthCreate.isNotEmpty ? yearMonthCreate : yearMonthModified;
+            yearMonthCreate.isNotEmpty ? yearMonthCreate : yearMonthModified;
 
         if (yearMonth.isEmpty) return map;
 
@@ -283,7 +278,7 @@ class AssetGroupingHelper {
 
     return groupedAssets.entries
         .map((entry) =>
-        MonthlyAssetViewModel(month: entry.key, assetList: entry.value))
+            MonthlyAssetViewModel(month: entry.key, assetList: entry.value))
         .toList();
   }
 }

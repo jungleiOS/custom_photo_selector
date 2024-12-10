@@ -1,3 +1,4 @@
+import 'package:custom_photo_selector/example.dart';
 import 'package:custom_photo_selector/photo_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -56,6 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 'show',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Example()),
+                );
+              },
+              child: const Text('example'),
             ),
           ],
         ),

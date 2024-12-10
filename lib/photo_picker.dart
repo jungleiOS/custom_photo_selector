@@ -530,6 +530,17 @@ class MonthlyAssetGroup extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
               Positioned(
+                child: Offstage(
+                  offstage: !isSelected,
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    return DecoratedBox(
+                        decoration:
+                            BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                        child: ConstrainedBox(constraints: constraints));
+                  }),
+                ),
+              ),
+              Positioned(
                 bottom: 1,
                 left: 4,
                 child: Offstage(
