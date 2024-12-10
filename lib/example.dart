@@ -17,6 +17,7 @@ class _ExampleState extends State<Example> {
   bool _hasMore = true;
   List<MonthlyAssetViewModel> _dataList = [];
   final List<AssetEntity> _assetList = [];
+  final List<AssetEntity> _selectedList = [];
 
   @override
   void initState() {
@@ -27,7 +28,9 @@ class _ExampleState extends State<Example> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('example'),),
+      appBar: AppBar(
+        title: const Text('example'),
+      ),
       body: MediaQuery.removePadding(
         context: context,
         removeTop: true,
@@ -40,7 +43,83 @@ class _ExampleState extends State<Example> {
               _pageIndex++;
               getAssets();
             }
-            return AssetGroup(model: model);
+            bool selectedAll = true;
+            for (final asset in model.assetList) {
+              final index = _selectedList.indexOf(asset);
+              if (index == -1) {
+                selectedAll = false;
+                break;
+              }
+            }
+            return AssetGroup(
+              model: model,
+              selectedAll: selectedAll,
+              onTapSelectedAll: (selected) {
+                if (selected) {
+                  unSelectAll(model.assetList);
+                } else {
+                  selectAll(model.assetList);
+                }
+              },
+              itemBuilder: (context, groupIndex) {
+                final asset = model.assetList[groupIndex];
+                final index = _selectedList.indexOf(asset);
+                final selected = index != -1;
+                final icon =
+                    selected ? Icons.check_circle : Icons.circle_outlined;
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: AssetEntityImage(
+                        asset,
+                        isOriginal: false,
+                        thumbnailSize: const ThumbnailSize.square(300),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: Offstage(
+                        offstage: !selected,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.3),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 4.0,
+                      top: 4.0,
+                      child: Offstage(
+                        offstage: !selected,
+                        child: Text(
+                          (index + 1).toString(),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 0.0,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          tapAsset(asset);
+                        },
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(12.0, 4.0, 4.0, 12.0),
+                          child: Icon(
+                            icon,
+                            size: 20.0,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
           },
         ),
       ),
@@ -48,7 +127,8 @@ class _ExampleState extends State<Example> {
   }
 
   void initData() async {
-    final tempList = await PhotoManager.getAssetPathList(type: RequestType.common);
+    final tempList =
+        await PhotoManager.getAssetPathList(type: RequestType.common);
     if (tempList.isEmpty) {
       EasyLoading.showToast('相册为空');
       return;
@@ -72,40 +152,96 @@ class _ExampleState extends State<Example> {
       }
     }
   }
+
+  void tapAsset(AssetEntity asset) {
+    final index = _selectedList.indexOf(asset);
+    if (index != -1) {
+      _selectedList.removeAt(index);
+    } else {
+      _selectedList.add(asset);
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void selectAll(List<AssetEntity> list) {
+    for (final asset in list) {
+      if (!_selectedList.contains(asset)) {
+        _selectedList.add(asset);
+      }
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void unSelectAll(List<AssetEntity> list) {
+    for (final asset in list) {
+      _selectedList.remove(asset);
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
 }
 
 class AssetGroup extends StatelessWidget {
   const AssetGroup({
     super.key,
     required this.model,
+    required this.itemBuilder,
+    this.selectedAll = false,
+    this.onTapSelectedAll,
   });
 
   final MonthlyAssetViewModel model;
+  final IndexedWidgetBuilder itemBuilder;
+  final bool selectedAll;
+  final ValueChanged<bool>? onTapSelectedAll;
 
   @override
   Widget build(BuildContext context) {
+    final icon = selectedAll ? Icons.check_circle : Icons.circle_outlined;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = (constraints.maxWidth - 3*2) / 4;
+        final width = (constraints.maxWidth - 3 * 2) / 4;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(model.month),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(model.month),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    onTapSelectedAll?.call(selectedAll);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12.0, 4.0, 4.0, 4.0),
+                    child: Icon(
+                      icon,
+                      size: 20.0,
+                      color: Colors.green,
+                    ),
+                  ),
+                )
+              ],
+            ),
             Wrap(
               spacing: 2,
               runSpacing: 2,
-              children: model.assetList
-                  .map(
-                    (asset) => AssetEntityImage(
-                      asset,
-                      isOriginal: false,
-                      thumbnailSize: const ThumbnailSize.square(300),
-                      fit: BoxFit.cover,
-                      width: width,
-                      height: width,
-                    ),
-                  )
-                  .toList(),
+              children: model.assetList.map(
+                (asset) {
+                  final index = model.assetList.indexOf(asset);
+                  return SizedBox(
+                    width: width,
+                    height: width,
+                    child: itemBuilder(context, index),
+                  );
+                },
+              ).toList(),
             ),
           ],
         );

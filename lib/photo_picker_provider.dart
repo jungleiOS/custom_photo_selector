@@ -231,12 +231,10 @@ class PhotoPickerProvider extends ChangeNotifier {
 class MonthlyAssetViewModel {
   String month;
   List<AssetEntity> assetList;
-  bool selectAll;
 
   MonthlyAssetViewModel({
     this.month = '',
     this.assetList = const [],
-    this.selectAll = false,
   });
 }
 
