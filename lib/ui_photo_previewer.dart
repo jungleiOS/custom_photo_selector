@@ -230,6 +230,7 @@ class _UIPhotoPreviewerState extends State<UIPhotoPreviewer> {
                               child: Icon(
                                 iconImage,
                                 size: 20.0,
+                                color: Colors.green,
                               ),
                             ),
                           );

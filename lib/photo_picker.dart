@@ -49,7 +49,6 @@ class PhotoPicker extends StatefulWidget {
   static Future<void> show(
     BuildContext context, {
     int gridCount = 4,
-
     /// 资源过滤器，[null] 则不过滤
     AssetFilter? filter,
     int maxCount = 9,
@@ -57,13 +56,10 @@ class PhotoPicker extends StatefulWidget {
     ValueChanged<bool>? onOriginChange,
     AssetSelectPredicate<AssetEntity>? selectPredicate,
     List<AssetEntity> selectedAssets = const [],
-
     /// 默认是否原图，[null] 不显示
     bool? defaultOriginal,
-
     /// 底部栏头部
     WidgetBuilder? bottomBarHeaderBuilder,
-
     /// Request assets type.
     /// 请求的资源类型
     RequestType requestType = RequestType.common,
@@ -717,7 +713,11 @@ class _AlbumPathSelectorState extends State<AlbumPathSelector> {
                           child: child!,
                         );
                       },
-                      child: const Icon(Icons.check_box, size: 16.0),
+                      child: const Icon(
+                        Icons.radio_button_checked,
+                        size: 20.0,
+                        color: Colors.green,
+                      ),
                     ),
                   ],
                 ),
